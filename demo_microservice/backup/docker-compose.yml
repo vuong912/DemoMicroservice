@@ -1,0 +1,27 @@
+version: '3.3'
+services:
+  proxy:
+    image: traefik:1.7.4-alpine
+    command:
+      - "--api"
+      - "--docker"
+      - "--docker.watch"
+    labels:
+      - "traefik.frontend.rule=Host:monitor.local"
+      - "traefik.port=8080"
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+
+  books:
+    build: ./books
+    image: vg/books
+    labels:
+      - "traefik.backend=books"
+      - "traefik.frontend.rule=Host:books.local"

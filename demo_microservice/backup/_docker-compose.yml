@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: traefik
+    command: --api --docker --docker.watch
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  books:
+    build: ./books
+    image: v/books
+    labels:
+      - "traefik.backend=books"
+      - "traefik.frontend.rule=Host:books.local"
+  customers:
+    build: ./customers
+    image: v/customers
+    labels:
+      - "traefik.backend=customers"
+      - "traefik.frontend.rule=Host:customers.local"
