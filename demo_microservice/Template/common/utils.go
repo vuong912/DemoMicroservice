@@ -2,6 +2,9 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -83,5 +86,22 @@ func createDbSession() {
 	})
 	if err != nil {
 		log.Fatalf("[createDbSession]: %s\n", err)
+	}
+}
+
+var client = &http.Client{}
+
+func RequestService(method string, path string, body io.Reader, host string) ([]byte, error) {
+	req, _ := http.NewRequest(method, path, body)
+	if host != "" {
+		req.Host = host
+	}
+	resp, err := client.Do(req)
+
+	if err == nil && resp.StatusCode == 200 {
+		bytes, _ := ioutil.ReadAll(resp.Body)
+		return bytes, nil
+	} else {
+		return nil, fmt.Errorf("Some error")
 	}
 }
