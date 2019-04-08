@@ -1,0 +1,22 @@
+package models
+
+import (
+	"gopkg.in/mgo.v2/bson"
+)
+
+type (
+	User struct {
+		Id         bson.ObjectId `bson:"_id,omitempty" json:"id"`
+		Username   string        `json:"username"`
+		Password   string        `json:"password"`
+		IdEmployee string        `json:"idEmployee`
+		Role       string        `json:"role"`
+	}
+	UserQuery struct {
+		Id         string
+		Username   string
+		IdEmployee string
+		Role       string
+		SortBy     string
+	}
+)

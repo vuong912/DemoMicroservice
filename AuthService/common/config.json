@@ -1,0 +1,9 @@
+{
+    "Server" : "0.0.0.0:8080",
+    "MongoDBHost" : "db",
+    "MongoDBUser" : "",
+    "MongoDBPwd" : "",
+    "Database" : "User",
+    "ServerIP" : "192.168.99.100",
+    "ServiceHost" : "template.local"
+}
