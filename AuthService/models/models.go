@@ -12,11 +12,4 @@ type (
 		IdEmployee string        `json:"idEmployee`
 		Role       string        `json:"role"`
 	}
-	UserQuery struct {
-		Id         string
-		Username   string
-		IdEmployee string
-		Role       string
-		SortBy     string
-	}
 )

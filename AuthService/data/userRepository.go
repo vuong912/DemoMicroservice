@@ -10,11 +10,15 @@ type UserRepository struct {
 	C *mgo.Collection
 }
 
-func (r *UserRepository) GetAll(query *models.UserQuery) []model.Movie {
-	string strQuery = "id"
-	if query.Id != "" {
-		r.C.Find(bson.M{"id":query.Id}).Iter
+func (r *UserRepository) GetAll(query interface{}, orderBy string, pageStep, pageSize int) (int, []models.User) {
+	var users []models.User
+	resQuery := r.C.Find(query)
+	if orderBy != "" {
+		resQuery = resQuery.Sort(orderBy)
 	}
+	sizeResult, _ := resQuery.Count()
+	resQuery.Skip((pageStep - 1) * pageSize).Limit(pageSize).All(&users)
+	return sizeResult, users
 }
 func (r *UserRepository) Create(user *models.User) error {
 	obj_id := bson.NewObjectId()

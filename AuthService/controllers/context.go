@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/DemoMicroservice/demo_microservice/Template/common"
+	"github.com/DemoMicroservice/AuthService/common"
 	"gopkg.in/mgo.v2"
 )
 

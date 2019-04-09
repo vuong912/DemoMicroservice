@@ -41,12 +41,10 @@ func DisplayAppError(w http.ResponseWriter, handlerError error, message string, 
 	}
 }
 
-func DisplayJsonResult(w http.ResponseWriter, message interface{}) {
+func DisplayJsonResult(w http.ResponseWriter, message []byte) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	if j, err := json.Marshal(message); err == nil {
-		w.Write(j)
-	}
+	w.Write(message)
 }
 
 var AppConfig configuration
