@@ -1,0 +1,5 @@
+{"roleName":"Admin","status":true,"createdDay":{"$date":{"$numberLong":"983379920000"}},"modifiedDay":{"$date":{"$numberLong":"988635760000"}},"createdBy":"absbe","modifiedBy":"sebsebse"}
+{"roleName":"Owner","status":true,"createdDay":{"$date":{"$numberLong":"992450005400"}},"modifiedDay":{"$date":{"$numberLong":"988837760000"}},"createdBy":"sef","modifiedBy":"sefsv"}
+{"roleName":"Planner","status":true,"createdDay":{"$date":{"$numberLong":"983379920000"}},"modifiedDay":{"$date":{"$numberLong":"988366760000"}},"createdBy":"364fe","modifiedBy":"xddef"}
+{"roleName":"Employee","status":true,"createdDay":{"$date":{"$numberLong":"992458705400"}},"modifiedDay":{"$date":{"$numberLong":"988832260000"}},"createdBy":"345t","modifiedBy":"wgewe"}
+{"roleName":"Manager","status":false,"createdDay":{"$date":{"$numberLong":"983377820000"}},"modifiedDay":{"$date":{"$numberLong":"989366760000"}},"createdBy":"htrh","modifiedBy":"rhttt"}

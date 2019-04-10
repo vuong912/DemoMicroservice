@@ -1,0 +1,9 @@
+{
+    "Server" : ":8081",
+    "MongoDBHost" : "localhost:27017",
+    "MongoDBUser" : "",
+    "MongoDBPwd" : "",
+    "Database" : "roledb",
+    "ServerIP" : "127.0.0.1",
+    "ServiceHost" : "template.local"
+}
