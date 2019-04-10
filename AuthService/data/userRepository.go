@@ -25,3 +25,11 @@ func (r *UserRepository) Create(user *models.User) error {
 	user.Id = obj_id
 	return r.C.Insert(&user)
 }
+func (r *UserRepository) Login(username, password string) *models.User {
+	var user *models.User
+	r.C.Find(bson.M{
+		"username": username,
+		"password": password,
+	}).One(&user)
+	return user
+}

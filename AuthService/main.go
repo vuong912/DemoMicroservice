@@ -6,17 +6,17 @@ import (
 
 	"github.com/DemoMicroservice/AuthService/common"
 	"github.com/DemoMicroservice/AuthService/routers"
+	"github.com/gorilla/handlers"
 )
 
 func main() {
 
 	common.StartUp()
 	router := routers.InitRoutes()
-
-	server := &http.Server{
-		Addr:    common.AppConfig.Server,
-		Handler: router,
-	}
 	log.Println("Listening...")
-	server.ListenAndServe()
+	log.Fatal(http.ListenAndServe(
+		common.AppConfig.Server,
+		handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+			handlers.AllowedOrigins([]string{"*"}))(router)))
 }
