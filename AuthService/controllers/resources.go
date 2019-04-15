@@ -12,8 +12,9 @@ type (
 		Password string `json:"password"`
 	}
 	AuthResource struct {
-		Id         string `json:"id"`
+		IdUser     string `json:"idUser"`
 		Username   string `json:"username"`
 		IdEmployee string `json:"idEmployee"`
+		Role       string `json:"role"`
 	}
 )

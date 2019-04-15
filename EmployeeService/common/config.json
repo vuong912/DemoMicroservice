@@ -1,0 +1,9 @@
+{
+    "Server" : ":8084",
+    "MongoDBHost" : "localhost:27017",
+    "MongoDBUser" : "",
+    "MongoDBPwd" : "",
+    "Database" : "employeedb",
+    "ServerIP" : "127.0.0.1",
+    "AuthServiceHost" : "http://127.0.0.1:8080"
+}

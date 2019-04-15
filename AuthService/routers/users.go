@@ -6,8 +6,8 @@ import (
 )
 
 func SetUsersRouters(router *mux.Router) *mux.Router {
-	router.HandleFunc("/users", controllers.GetUsersHandler).Methods("GET")
-	router.HandleFunc("/login", controllers.LoginHandler).Methods("POST")
-	router.HandleFunc("/auth", controllers.AuthHandler).Methods("GET")
+	router.HandleFunc("/user/get", controllers.GetUsersHandler).Methods("GET")
+	router.HandleFunc("/user/login", controllers.LoginHandler).Methods("POST")
+	router.HandleFunc("/user/auth", controllers.AuthHandler).Methods("GET")
 	return router
 }

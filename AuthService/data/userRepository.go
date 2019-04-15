@@ -17,8 +17,18 @@ func (r *UserRepository) GetAll(query interface{}, orderBy string, pageStep, pag
 		resQuery = resQuery.Sort(orderBy)
 	}
 	sizeResult, _ := resQuery.Count()
-	resQuery.Skip((pageStep - 1) * pageSize).Limit(pageSize).All(&users)
+	iter := resQuery.Skip((pageStep - 1) * pageSize).Limit(pageSize).Iter()
+	user := models.User{}
+	for iter.Next(&user) {
+		user.Password = ""
+		users = append(users, user)
+	}
 	return sizeResult, users
+}
+func (r *UserRepository) GetById(id string) models.User {
+	var user models.User
+	r.C.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&user)
+	return user
 }
 func (r *UserRepository) Create(user *models.User) error {
 	obj_id := bson.NewObjectId()

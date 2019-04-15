@@ -102,13 +102,20 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if parsedToken.Valid {
 		claims := parsedToken.Claims.(jwt.MapClaims)
-		username, _ := claims["username"].(string)
 		id, _ := claims["id"].(string)
-		idEmployee, _ := claims["idEmployee"].(string)
+		//username, _ := claims["username"].(string)
+		//idEmployee, _ := claims["idEmployee"].(string)
+
+		context := NewContext()
+		defer context.Close()
+		c := context.DbCollection("user")
+		repo := &data.UserRepository{c}
+		user := repo.GetById(id)
 		j, err := json.Marshal(AuthResource{
-			Id:         id,
-			IdEmployee: idEmployee,
-			Username:   username,
+			IdUser:     id,
+			IdEmployee: user.IdEmployee,
+			Username:   user.Username,
+			Role:       user.Role,
 		})
 
 		if err != nil {
