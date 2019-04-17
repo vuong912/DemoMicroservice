@@ -5,5 +5,5 @@
     "MongoDBPwd" : "",
     "Database" : "employeedb",
     "ServerIP" : "127.0.0.1",
-    "AuthServiceHost" : "http://127.0.0.1:8080"
+    "AuthAPIHost" : "http://127.0.0.1:8080/user/auth"
 }

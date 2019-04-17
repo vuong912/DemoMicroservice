@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -39,14 +38,18 @@ func GetRolesHandler(w http.ResponseWriter, r *http.Request) {
 		pageStep = 1
 	}
 
-	size, roles := repo.GetAll(mapQuery, vars.Get("orderby"), pageStep, pageSize)
+	size, roles, err := repo.GetAll(mapQuery, vars.Get("orderby"), pageStep, pageSize)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
+		return
+	}
 	j, err := json.Marshal(RolesResource{
 		Size: size,
 		Data: roles,
 	})
 
 	if err != nil {
-		log.Println("Error parse json")
+		common.DisplayAppError(w, err, "Error parse json", http.StatusInternalServerError)
 		return
 	}
 	common.DisplayJsonResult(w, j)

@@ -5,16 +5,18 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/DemoMicroservice/EmployeeService/common"
 	"github.com/DemoMicroservice/EmployeeService/data"
+	"github.com/DemoMicroservice/EmployeeService/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
 func GetAuthInfo(r *http.Request) (*AuthResource, error) {
 	bytes, err := common.RequestService(
 		"GET",
-		common.AppConfig.AuthServiceHost+"/user/auth",
+		common.AppConfig.AuthAPIHost,
 		nil,
 		"",
 		r.Header.Get("Authorization"))
@@ -41,11 +43,15 @@ func GetMyseftHandler(w http.ResponseWriter, r *http.Request) {
 	c := context.DbCollection("employee")
 
 	repo := &data.EmployeeRepository{c}
-	employee := repo.GetById((*auth).IdEmployee)
+	employee, err := repo.GetById((*auth).IdEmployee)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
+		return
+	}
 	j, err := json.Marshal(employee)
 
 	if err != nil {
-		log.Println("Error parse json")
+		common.DisplayAppError(w, err, "Error parse json", http.StatusInternalServerError)
 		return
 	}
 	common.DisplayJsonResult(w, j)
@@ -109,16 +115,48 @@ func GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
 		pageStep = 1
 	}
 
-	size, employees := repo.GetAll(mapQuery, vars.Get("orderby"), pageStep, pageSize)
+	size, employees, err := repo.GetAll(mapQuery, vars.Get("orderby"), pageStep, pageSize)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
+		return
+	}
 	j, err := json.Marshal(EmployeesResource{
 		Size: size,
 		Data: employees,
 	})
 
 	if err != nil {
-		log.Println("Error parse json")
+		common.DisplayAppError(w, err, "Error parse json", http.StatusInternalServerError)
 		return
 	}
 	common.DisplayJsonResult(w, j)
 	//fmt.Printf("Result: %s\n", j)
+}
+func CreateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
+	var employee models.Employee
+	// Decode the incoming Movie json
+	err := json.NewDecoder(r.Body).Decode(&employee)
+	if err != nil {
+		common.DisplayAppError(w, err, "Invalid employee data", http.StatusInternalServerError)
+		return
+	}
+
+	// create new context
+	context := NewContext()
+	defer context.Close()
+	c := context.DbCollection("employee")
+	// Insert a movie document
+	repo := &data.EmployeeRepository{c}
+	employee.CreatedDay = time.Now()
+	employee.ModifiedDay = time.Now()
+	err = repo.Create(&employee)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error create database", http.StatusInternalServerError)
+	}
+	j, err := json.Marshal(employee)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error parse json", http.StatusInternalServerError)
+		return
+	}
+	common.DisplayJsonResult(w, j)
 }

@@ -24,7 +24,7 @@ type (
 	}
 	configuration struct {
 		Server, MongoDBHost, DBUser, DBPwd, Database, ServerIP string
-		AuthServiceHost                                        string
+		AuthAPIHost                                            string
 	}
 )
 

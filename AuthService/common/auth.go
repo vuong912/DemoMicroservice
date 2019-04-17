@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
-	"net/http"
 	"time"
 
 	"github.com/DemoMicroservice/AuthService/models"
@@ -33,25 +31,21 @@ func initKey() {
 	}
 }
 
-func GenerateToken(w http.ResponseWriter, user *models.User) {
+func GenerateToken(user *models.User) ([]byte, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := make(jwt.MapClaims)
 	claims["id"] = user.Id
 	claims["idEmployee"] = user.IdEmployee
 	claims["username"] = user.Username
-	claims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * 60).Unix()
 	token.Claims = claims
 	tokenString, err := token.SignedString(Key.SecretKey)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, "Sorry, error while Signing Token!")
-		log.Printf("Error: %v\n", err)
-		return
+		return nil, err
 	}
 	j, err := json.Marshal(Token{tokenString})
 	if err != nil {
-		log.Println("Error parse json key")
-		return
+		return nil, err
 	}
-	DisplayJsonResult(w, j)
+	return j, nil
 }

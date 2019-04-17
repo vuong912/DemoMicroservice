@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,7 +20,6 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	c := context.DbCollection("user")
 	repo := &data.UserRepository{c}
 	var mapQuery = make(bson.M)
-
 	vars := r.URL.Query()
 
 	if val := vars.Get("id"); val != "" {
@@ -46,14 +44,17 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 		pageStep = 1
 	}
 
-	size, users := repo.GetAll(mapQuery, vars.Get("orderby"), pageStep, pageSize)
+	size, users, err := repo.GetAll(mapQuery, vars.Get("orderby"), pageStep, pageSize)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
+		return
+	}
 	j, err := json.Marshal(UsersResource{
 		Size: size,
 		Data: users,
 	})
-
 	if err != nil {
-		log.Println("Error parse json")
+		common.DisplayAppError(w, err, "Error parse json", http.StatusInternalServerError)
 		return
 	}
 	common.DisplayJsonResult(w, j)
@@ -63,21 +64,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var login LoginResource
 	err := json.NewDecoder(r.Body).Decode(&login)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, "Error in request body")
+		common.DisplayAppError(w, err, "Failed parse json", http.StatusBadRequest)
 		return
 	}
 	context := NewContext()
 	defer context.Close()
 	c := context.DbCollection("user")
 	repo := &data.UserRepository{c}
-	user := repo.Login(login.Username, login.Password)
-	if user == nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintln(w, "Wrong")
+	user, err := repo.Login(login.Username, login.Password)
+	if err != nil || user == nil {
+		common.DisplayAppError(w, err, "Failed login", http.StatusUnauthorized)
 		return
 	}
-	common.GenerateToken(w, user)
+	bytes, err := common.GenerateToken(user)
+	if err != nil || bytes == nil {
+		common.DisplayAppError(w, err, "Failed generate token", http.StatusInternalServerError)
+		return
+	}
+	common.DisplayJsonResult(w, bytes)
 }
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	var token string
@@ -110,7 +114,11 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 		defer context.Close()
 		c := context.DbCollection("user")
 		repo := &data.UserRepository{c}
-		user := repo.GetById(id)
+		user, err := repo.GetById(id)
+		if err != nil {
+			common.DisplayAppError(w, err, "Error when get user by id", http.StatusInternalServerError)
+			return
+		}
 		j, err := json.Marshal(AuthResource{
 			IdUser:     id,
 			IdEmployee: user.IdEmployee,
