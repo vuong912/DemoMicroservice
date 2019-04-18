@@ -25,6 +25,7 @@ type (
 	configuration struct {
 		Server, MongoDBHost, DBUser, DBPwd, Database, ServerIP string
 		AuthAPIHost                                            string
+		GetRoleAPIHost                                         string
 	}
 )
 
@@ -98,11 +99,8 @@ func createDbSession() {
 
 var client = &http.Client{}
 
-func RequestService(method string, path string, body io.Reader, host string, token string) ([]byte, error) {
+func RequestService(method string, path string, body io.Reader, token string) ([]byte, error) {
 	req, _ := http.NewRequest(method, path, body)
-	if host != "" {
-		req.Host = host
-	}
 	req.Header.Add("Authorization", token)
 	resp, err := client.Do(req)
 

@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,13 +13,73 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func GetAuthInfo(r *http.Request) (*AuthResource, error) {
+var tokenToInfo map[string]*PermissionInfo = make(map[string]*PermissionInfo)
+
+func AuthMiddleware(next http.Handler, roleAccept *map[string]bool) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("Authorization")
+		authResource, err := GetAuthInfo(token)
+		if err != nil {
+			common.DisplayAppError(w, err, "Error authorization", http.StatusUnauthorized)
+			return
+		}
+		role, err := GetRoleInfo(authResource.Role)
+		if err != nil {
+			common.DisplayAppError(w, err, "Error call api role", http.StatusInternalServerError)
+			return
+		}
+		if val, ok := (*roleAccept)[role.RoleName]; !ok || val == false {
+			common.DisplayAppError(w, errors.New("Unauthentication"), "Unauthentication", http.StatusForbidden)
+			return
+		}
+		employee, err := GetEmployeeInfo(authResource.IdEmployee)
+		if err != nil {
+			common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
+			return
+		}
+
+		permissionInfo := PermissionInfo{
+			IdEmployee: authResource.IdEmployee,
+			IdBranch:   employee.IdBranch,
+			IdUser:     authResource.IdUser,
+			RoleName:   role.RoleName,
+		}
+		tokenToInfo[token] = &permissionInfo
+		next.ServeHTTP(w, r)
+		delete(tokenToInfo, token)
+	})
+}
+func GetRoleInfo(idRole string) (*Role, error) {
+	bytes, err := common.RequestService(
+		"GET",
+		common.AppConfig.GetRoleAPIHost+"?id="+idRole,
+		nil,
+		"")
+	if err != nil {
+		return nil, err
+	}
+	roleresource := RoleResource{}
+	err = json.Unmarshal(bytes, &roleresource)
+	if err != nil {
+		return nil, err
+	}
+	return &roleresource.Data[0], nil
+}
+func GetEmployeeInfo(idEmployee string) (*models.Employee, error) {
+	context := NewContext()
+	defer context.Close()
+	c := context.DbCollection("employee")
+
+	repo := &data.EmployeeRepository{c}
+	employee, err := repo.GetById(idEmployee)
+	return &employee, err
+}
+func GetAuthInfo(token string) (*AuthResource, error) {
 	bytes, err := common.RequestService(
 		"GET",
 		common.AppConfig.AuthAPIHost,
 		nil,
-		"",
-		r.Header.Get("Authorization"))
+		token)
 	if err != nil {
 		return nil, err
 	}
@@ -31,19 +91,14 @@ func GetAuthInfo(r *http.Request) (*AuthResource, error) {
 	return &auth, nil
 }
 func GetMyseftHandler(w http.ResponseWriter, r *http.Request) {
-	auth, err := GetAuthInfo(r)
+	auth, err := GetAuthInfo(r.Header.Get("Authorization"))
 	if err != nil {
 		common.DisplayAppError(w, err, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	log.Println(*auth)
+	//log.Println(*auth)
 	//auth := AuthResource{IdEmployee: "5cb0372fe929393474fb7ff1"}
-	context := NewContext()
-	defer context.Close()
-	c := context.DbCollection("employee")
-
-	repo := &data.EmployeeRepository{c}
-	employee, err := repo.GetById((*auth).IdEmployee)
+	employee, err := GetEmployeeInfo(auth.IdEmployee)
 	if err != nil {
 		common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
 		return
@@ -57,10 +112,6 @@ func GetMyseftHandler(w http.ResponseWriter, r *http.Request) {
 	common.DisplayJsonResult(w, j)
 }
 func GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
-	context := NewContext()
-	defer context.Close()
-	c := context.DbCollection("employee")
-	repo := &data.EmployeeRepository{c}
 	var mapQuery = make(bson.M)
 
 	vars := r.URL.Query()
@@ -92,8 +143,10 @@ func GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
 			mapQuery["rangeWage"] = rangeWageMap
 		}
 	}
-
-	if val := vars.Get("idbranch"); val != "" {
+	authInfo := tokenToInfo[r.Header.Get("Authorization")]
+	if authInfo.RoleName == common.PlannerRole {
+		mapQuery["idBranch"] = authInfo.IdBranch
+	} else if val := vars.Get("idbranch"); val != "" {
 		mapQuery["idBranch"] = val
 	}
 	if val := vars.Get("status"); val == "true" || val == "false" {
@@ -115,6 +168,10 @@ func GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
 		pageStep = 1
 	}
 
+	context := NewContext()
+	defer context.Close()
+	c := context.DbCollection("employee")
+	repo := &data.EmployeeRepository{c}
 	size, employees, err := repo.GetAll(mapQuery, vars.Get("orderby"), pageStep, pageSize)
 	if err != nil {
 		common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
@@ -134,21 +191,18 @@ func GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
 }
 func CreateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
 	var employee models.Employee
-	// Decode the incoming Movie json
 	err := json.NewDecoder(r.Body).Decode(&employee)
 	if err != nil {
-		common.DisplayAppError(w, err, "Invalid employee data", http.StatusInternalServerError)
+		common.DisplayAppError(w, err, "Invalid employee data", http.StatusBadRequest)
 		return
 	}
+	employee.CreatedDay = time.Now()
+	employee.ModifiedDay = time.Now()
 
-	// create new context
 	context := NewContext()
 	defer context.Close()
 	c := context.DbCollection("employee")
-	// Insert a movie document
 	repo := &data.EmployeeRepository{c}
-	employee.CreatedDay = time.Now()
-	employee.ModifiedDay = time.Now()
 	err = repo.Create(&employee)
 	if err != nil {
 		common.DisplayAppError(w, err, "Error create database", http.StatusInternalServerError)

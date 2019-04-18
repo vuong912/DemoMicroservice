@@ -14,10 +14,10 @@ services:
     image: v/books
     labels:
       - "traefik.backend=books"
-      - "traefik.frontend.rule=Host:books.local"
+      - "traefik.frontend.rule=PathPrefixStrip:/book/"
   customers:
     build: ./customers
     image: v/customers
     labels:
       - "traefik.backend=customers"
-      - "traefik.frontend.rule=Host:customers.local"
+      - "traefik.frontend.rule=PathPrefixStrip:/customer/"

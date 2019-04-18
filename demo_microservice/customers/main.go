@@ -22,7 +22,7 @@ func GetIdHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	data := "User " + params["id"] + "th have "
 
-	resp, err := Request("GET", "http://192.168.99.100/books/"+params["id"], nil, ServicesHost.BooksHost)
+	resp, err := Request("GET", "http://192.168.99.103/book/books"+params["id"], nil, ServicesHost.BooksHost)
 	//resp, err := Request("GET", "http://127.0.0.1:80/books", nil, ServicesHost.BooksHost)
 	if err == nil {
 		w.Write([]byte(data + string(resp) + "~~~"))
