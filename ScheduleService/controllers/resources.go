@@ -3,35 +3,21 @@ package controllers
 import (
 	"time"
 
-	"github.com/DemoMicroservice/AuthService/models"
+	"github.com/DemoMicroservice/ScheduleService/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
 type (
-	UsersResource struct {
-		Size int           `json:"size"`
-		Data []models.User `json:"data"`
+	SchedulesResource struct {
+		Size int               `json:"size"`
+		Data []models.Schedule `json:"data"`
 	}
-	CreateUserResource struct {
-		Username   string `json:"username"`
-		IdEmployee string `json:"idEmployee"`
-		Role       string `json:"role"`
-	}
-	LoginResource struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+
 	AuthResource struct {
 		IdUser     string `json:"idUser"`
 		Username   string `json:"username"`
 		IdEmployee string `json:"idEmployee"`
 		Role       string `json:"role"`
-	}
-	PermissionInfo struct {
-		IdUser     string
-		IdEmployee string
-		RoleName   string
-		IdBranch   string
 	}
 	Role struct {
 		Id          string    `json:"id"`
@@ -45,6 +31,12 @@ type (
 	RoleResource struct {
 		Size int    `json"size"`
 		Data []Role `json:"data"`
+	}
+	PermissionInfo struct {
+		IdUser     string
+		IdEmployee string
+		RoleName   string
+		IdBranch   string
 	}
 	Employee struct {
 		Id                 bson.ObjectId        `json:"id"`

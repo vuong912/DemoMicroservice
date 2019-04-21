@@ -17,7 +17,25 @@ func SetUsersRouters(router *mux.Router) *mux.Router {
 		common.OwnerRole:   true,
 		common.PlannerRole: true,
 	}
-	router.Handle("/employee/get", controllers.AuthMiddleware(getEmployeesHandler, &getEmployeesRole))
-	router.HandleFunc("/employee/getmyseft", controllers.GetMyseftHandler).Methods("GET")
+
+	createEmployeeHandler := http.HandlerFunc(controllers.CreateEmployeeHandler)
+	createEmployeeRole := map[string]bool{
+		common.AdminRole:   true,
+		common.OwnerRole:   true,
+		common.PlannerRole: true,
+	}
+
+	updateEmployeeWorkHandler := http.HandlerFunc(controllers.UpdateEmployeeWorkHandler)
+	updateEmployeeWorkRole := map[string]bool{
+		common.AdminRole:   true,
+		common.OwnerRole:   true,
+		common.PlannerRole: true,
+	}
+
+	router.Handle("/employee/get", controllers.AuthMiddleware(getEmployeesHandler, &getEmployeesRole)).Methods("GET")
+	router.HandleFunc("/employee/getmyself", controllers.GetMyseftHandler).Methods("GET")
+	router.Handle("/employee/create", controllers.AuthMiddleware(createEmployeeHandler, &createEmployeeRole)).Methods("POST")
+	router.Handle("/employee/update/work", controllers.AuthMiddleware(updateEmployeeWorkHandler, &updateEmployeeWorkRole)).Methods("POST")
+
 	return router
 }

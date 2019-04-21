@@ -6,5 +6,6 @@
     "Database" : "employeedb",
     "ServerIP" : "127.0.0.1",
     "AuthAPIHost" : "http://127.0.0.1:8080/user/auth",
-    "GetRoleAPIHost":"http://127.0.0.1:8181/role/get"
+    "GetRoleAPIHost":"http://127.0.0.1:8181/role/get",
+    "CreateUserAPIHost":"http://127.0.0.1:8080/user/create"
 }

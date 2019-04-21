@@ -2,15 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
-	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/DemoMicroservice/AuthService/common"
 	"github.com/DemoMicroservice/AuthService/data"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/DemoMicroservice/AuthService/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -60,6 +57,37 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	common.DisplayJsonResult(w, j)
 	//fmt.Printf("Result: %s\n", j)
 }
+
+func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+	var createUserResource CreateUserResource
+	err := json.NewDecoder(r.Body).Decode(&createUserResource)
+	if err != nil {
+		common.DisplayAppError(w, err, "Invalid user data", http.StatusBadRequest)
+		return
+	}
+	user := models.User{
+		Username:   createUserResource.Username,
+		Password:   common.GetMD5Hash(common.AppConfig.DefaultPassword),
+		Role:       createUserResource.Role,
+		IdEmployee: createUserResource.IdEmployee,
+	}
+	context := NewContext()
+	defer context.Close()
+	c := context.DbCollection("user")
+	repo := &data.UserRepository{c}
+	err = repo.Create(&user)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error when create user", http.StatusInternalServerError)
+		return
+	}
+	j, err := json.Marshal(user)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error parse json", http.StatusInternalServerError)
+		return
+	}
+	common.DisplayJsonResult(w, j)
+}
+
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var login LoginResource
 	err := json.NewDecoder(r.Body).Decode(&login)
@@ -67,6 +95,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		common.DisplayAppError(w, err, "Failed parse json", http.StatusBadRequest)
 		return
 	}
+	login.Password = common.GetMD5Hash(login.Password)
 	context := NewContext()
 	defer context.Close()
 	c := context.DbCollection("user")
@@ -82,58 +111,4 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	common.DisplayJsonResult(w, bytes)
-}
-func AuthHandler(w http.ResponseWriter, r *http.Request) {
-	var token string
-	tokens, ok := r.Header["Authorization"]
-	if ok && len(tokens) >= 1 {
-		token = tokens[0]
-		token = strings.TrimPrefix(token, "Bearer ")
-	}
-	if token == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, (errors.New("Unexpected signing method"))
-		}
-		return common.Key.SecretKey, nil
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	if parsedToken.Valid {
-		claims := parsedToken.Claims.(jwt.MapClaims)
-		id, _ := claims["id"].(string)
-		//username, _ := claims["username"].(string)
-		//idEmployee, _ := claims["idEmployee"].(string)
-
-		context := NewContext()
-		defer context.Close()
-		c := context.DbCollection("user")
-		repo := &data.UserRepository{c}
-		user, err := repo.GetById(id)
-		if err != nil {
-			common.DisplayAppError(w, err, "Error when get user by id", http.StatusInternalServerError)
-			return
-		}
-		j, err := json.Marshal(AuthResource{
-			IdUser:     id,
-			IdEmployee: user.IdEmployee,
-			Username:   user.Username,
-			Role:       user.Role,
-		})
-
-		if err != nil {
-			log.Println("Error parse json")
-			return
-		}
-		common.DisplayJsonResult(w, j)
-
-	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
 }

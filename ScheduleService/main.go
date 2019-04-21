@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/DemoMicroservice/AuthService/common"
-	"github.com/DemoMicroservice/AuthService/routers"
+	"github.com/DemoMicroservice/ScheduleService/common"
+	"github.com/DemoMicroservice/ScheduleService/routers"
 	"github.com/gorilla/handlers"
 )
 
@@ -14,7 +14,7 @@ func main() {
 
 	common.StartUp()
 	router := routers.InitRoutes()
-	logFile, err := os.OpenFile("auth_server.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("schedule_server.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -25,10 +25,10 @@ func main() {
 			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
 			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
 			handlers.AllowedOrigins([]string{"*"}))(handlers.LoggingHandler(logFile, router))))
-
-	/*server := &http.Server{
-		Addr:    common.AppConfig.Server,
-		Handler: router,
-	}
-	server.ListenAndServe()*/
+	/*
+		server := &http.Server{
+			Addr:    common.AppConfig.Server,
+			Handler: router,
+		}
+		server.ListenAndServe()*/
 }

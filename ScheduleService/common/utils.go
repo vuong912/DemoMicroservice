@@ -24,10 +24,9 @@ type (
 	}
 	configuration struct {
 		Server, MongoDBHost, DBUser, DBPwd, Database, ServerIP string
-		DefaultPassword                                        string
-		ServiceHost                                            string
-		GetRoleAPIHost                                         string
 		GetMySelfEmployeeAPIHost                               string
+		AuthAPIHost                                            string
+		GetRoleAPIHost                                         string
 	}
 )
 

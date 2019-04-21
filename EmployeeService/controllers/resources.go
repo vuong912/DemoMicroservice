@@ -11,6 +11,16 @@ type (
 		Size int               `json:"size"`
 		Data []models.Employee `json:"data"`
 	}
+	EmployeeUpdateWorkResource struct {
+		IdEmployee         string                      `json:"idEmployee"`
+		DetailEmployeeWork []models.DetailEmployeeWork `json:"detailEmployeeWork"`
+	}
+	CreateUserResource struct {
+		Username   string `json:"username"`
+		IdEmployee string `json:"idEmployee"`
+		Role       string `json:"role"`
+	}
+
 	AuthResource struct {
 		IdUser     string `json:"idUser"`
 		Username   string `json:"username"`

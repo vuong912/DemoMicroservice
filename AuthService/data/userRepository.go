@@ -40,7 +40,9 @@ func (r *UserRepository) GetById(id string) (models.User, error) {
 func (r *UserRepository) Create(user *models.User) error {
 	obj_id := bson.NewObjectId()
 	user.Id = obj_id
-	return r.C.Insert(&user)
+	err := r.C.Insert(&user)
+	user.Password = ""
+	return err
 }
 func (r *UserRepository) Login(username, password string) (*models.User, error) {
 	var user *models.User
@@ -48,5 +50,6 @@ func (r *UserRepository) Login(username, password string) (*models.User, error) 
 		"username": username,
 		"password": password,
 	}).One(&user)
+	user.Password = ""
 	return user, err
 }

@@ -1,0 +1,11 @@
+{
+    "Server" : ":8085",
+    "MongoDBHost" : "localhost:27017",
+    "MongoDBUser" : "",
+    "MongoDBPwd" : "",
+    "Database" : "scheduledb",
+    "ServerIP" : "127.0.0.1",
+    "AuthAPIHost" : "http://127.0.0.1:8080/user/auth",
+    "GetMySelfEmployeeAPIHost":"http://127.0.0.1:8084/employee/getmyself",
+    "GetRoleAPIHost":"http://127.0.0.1:8181/role/get"
+}

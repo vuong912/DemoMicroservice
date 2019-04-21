@@ -4,6 +4,8 @@
     "MongoDBUser" : "",
     "MongoDBPwd" : "",
     "Database" : "userdb",
+    "DefaultPassword":"123456",
     "ServerIP" : "192.168.99.100",
-    "ServiceHost" : "template.local"
+    "GetRoleAPIHost" : "http://127.0.0.1:8181/role/get",
+    "GetMySelfEmployeeAPIHost": "http://127.0.0.1:8084/employee/getmyself"
 }

@@ -1,6 +1,8 @@
 package data
 
 import (
+	"time"
+
 	"github.com/DemoMicroservice/EmployeeService/models"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -34,4 +36,15 @@ func (r *EmployeeRepository) Create(employee *models.Employee) error {
 	employee.Id = obj_id
 	err := r.C.Insert(&employee)
 	return err
+}
+func (r *EmployeeRepository) Update(id, column, modifiedBy string, data interface{}) error {
+	filter := bson.M{"_id": bson.ObjectIdHex(id)}
+	update := bson.M{
+		"$set": bson.M{
+			column:        data,
+			"modifiedBy":  modifiedBy,
+			"modifiedDay": time.Now(),
+		},
+	}
+	return r.C.Update(filter, update)
 }

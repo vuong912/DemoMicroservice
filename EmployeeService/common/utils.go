@@ -26,6 +26,7 @@ type (
 		Server, MongoDBHost, DBUser, DBPwd, Database, ServerIP string
 		AuthAPIHost                                            string
 		GetRoleAPIHost                                         string
+		CreateUserAPIHost                                      string
 	}
 )
 
@@ -108,6 +109,6 @@ func RequestService(method string, path string, body io.Reader, token string) ([
 		bytes, _ := ioutil.ReadAll(resp.Body)
 		return bytes, nil
 	} else {
-		return nil, fmt.Errorf("Some error")
+		return nil, fmt.Errorf("Some error when request to %v", path)
 	}
 }

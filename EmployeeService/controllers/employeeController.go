@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -13,83 +14,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-var tokenToInfo map[string]*PermissionInfo = make(map[string]*PermissionInfo)
-
-func AuthMiddleware(next http.Handler, roleAccept *map[string]bool) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		authResource, err := GetAuthInfo(token)
-		if err != nil {
-			common.DisplayAppError(w, err, "Error authorization", http.StatusUnauthorized)
-			return
-		}
-		role, err := GetRoleInfo(authResource.Role)
-		if err != nil {
-			common.DisplayAppError(w, err, "Error call api role", http.StatusInternalServerError)
-			return
-		}
-		if val, ok := (*roleAccept)[role.RoleName]; !ok || val == false {
-			common.DisplayAppError(w, errors.New("Unauthentication"), "Unauthentication", http.StatusForbidden)
-			return
-		}
-		employee, err := GetEmployeeInfo(authResource.IdEmployee)
-		if err != nil {
-			common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
-			return
-		}
-
-		permissionInfo := PermissionInfo{
-			IdEmployee: authResource.IdEmployee,
-			IdBranch:   employee.IdBranch,
-			IdUser:     authResource.IdUser,
-			RoleName:   role.RoleName,
-		}
-		tokenToInfo[token] = &permissionInfo
-		next.ServeHTTP(w, r)
-		delete(tokenToInfo, token)
-	})
-}
-func GetRoleInfo(idRole string) (*Role, error) {
-	bytes, err := common.RequestService(
-		"GET",
-		common.AppConfig.GetRoleAPIHost+"?id="+idRole,
-		nil,
-		"")
-	if err != nil {
-		return nil, err
-	}
-	roleresource := RoleResource{}
-	err = json.Unmarshal(bytes, &roleresource)
-	if err != nil {
-		return nil, err
-	}
-	return &roleresource.Data[0], nil
-}
-func GetEmployeeInfo(idEmployee string) (*models.Employee, error) {
-	context := NewContext()
-	defer context.Close()
-	c := context.DbCollection("employee")
-
-	repo := &data.EmployeeRepository{c}
-	employee, err := repo.GetById(idEmployee)
-	return &employee, err
-}
-func GetAuthInfo(token string) (*AuthResource, error) {
-	bytes, err := common.RequestService(
-		"GET",
-		common.AppConfig.AuthAPIHost,
-		nil,
-		token)
-	if err != nil {
-		return nil, err
-	}
-	auth := AuthResource{}
-	err = json.Unmarshal(bytes, &auth)
-	if err != nil {
-		return nil, err
-	}
-	return &auth, nil
-}
 func GetMyseftHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := GetAuthInfo(r.Header.Get("Authorization"))
 	if err != nil {
@@ -130,16 +54,16 @@ func GetEmployeesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rangeWageMap := make(bson.M)
-	if val := vars.Get("gtrangewage"); val != "" {
+	if val := vars.Get("gterangewage"); val != "" {
 		if gtValue, err := strconv.ParseFloat(val, 64); err == nil {
-			rangeWageMap["$gt"] = gtValue
+			rangeWageMap["$gte"] = gtValue
 			mapQuery["rangeWage"] = rangeWageMap
 		}
 
 	}
-	if val := vars.Get("ltrangewage"); val != "" {
+	if val := vars.Get("lterangewage"); val != "" {
 		if ltValue, err := strconv.ParseFloat(val, 64); err == nil {
-			rangeWageMap["$lt"] = ltValue
+			rangeWageMap["$lte"] = ltValue
 			mapQuery["rangeWage"] = rangeWageMap
 		}
 	}
@@ -196,6 +120,20 @@ func CreateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
 		common.DisplayAppError(w, err, "Invalid employee data", http.StatusBadRequest)
 		return
 	}
+	err = ValidateEmployee(&employee)
+	if err != nil {
+		common.DisplayAppError(w, err, "Invalid employee data", http.StatusBadRequest)
+		return
+	}
+	token := r.Header.Get("Authorization")
+	authInfo := tokenToInfo[token]
+
+	if authInfo.RoleName == common.PlannerRole && authInfo.IdBranch != employee.IdBranch {
+		common.DisplayAppError(w, err, "Not have permission in this branch", http.StatusForbidden)
+	}
+
+	employee.CreatedBy = authInfo.IdEmployee
+	employee.ModifiedBy = authInfo.IdEmployee
 	employee.CreatedDay = time.Now()
 	employee.ModifiedDay = time.Now()
 
@@ -205,7 +143,28 @@ func CreateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
 	repo := &data.EmployeeRepository{c}
 	err = repo.Create(&employee)
 	if err != nil {
-		common.DisplayAppError(w, err, "Error create database", http.StatusInternalServerError)
+		common.DisplayAppError(w, err, "Error create employee in database", http.StatusInternalServerError)
+		return
+	}
+	role, err := GetRoleByName(common.EmployeeRole)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error get role", http.StatusInternalServerError)
+		return
+	}
+	createUserResource := CreateUserResource{
+		Username:   employee.Email,
+		IdEmployee: employee.Id.Hex(),
+		Role:       role.Id,
+	}
+	dataCreateUser, err := json.Marshal(createUserResource)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error parse json", http.StatusInternalServerError)
+		return
+	}
+	err = CreateUser(dataCreateUser, token)
+	if err != nil {
+		common.DisplayAppError(w, err, "Error create user", http.StatusInternalServerError)
+		return
 	}
 	j, err := json.Marshal(employee)
 	if err != nil {
@@ -213,4 +172,67 @@ func CreateEmployeeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	common.DisplayJsonResult(w, j)
+}
+func GetRoleByName(name string) (*Role, error) {
+	bytes, err := common.RequestService(
+		"GET",
+		common.AppConfig.GetRoleAPIHost+"?rolename="+name,
+		nil,
+		"")
+	if err != nil {
+		return nil, err
+	}
+	roleresource := RoleResource{}
+	err = json.Unmarshal(bytes, &roleresource)
+	if err != nil {
+		return nil, err
+	}
+	return &roleresource.Data[0], nil
+}
+func CreateUser(data []byte, token string) error {
+	_, err := common.RequestService("POST",
+		common.AppConfig.CreateUserAPIHost,
+		bytes.NewBuffer(data),
+		token)
+	return err
+}
+
+func UpdateEmployeeWorkHandler(w http.ResponseWriter, r *http.Request) {
+	var employeeUpdateWorkResource EmployeeUpdateWorkResource
+	err := json.NewDecoder(r.Body).Decode(&employeeUpdateWorkResource)
+	if err != nil {
+		common.DisplayAppError(w, err, "Invalid employee data", http.StatusBadRequest)
+		return
+	}
+	authInfo := tokenToInfo[r.Header.Get("Authorization")]
+
+	context := NewContext()
+	defer context.Close()
+	c := context.DbCollection("employee")
+	repo := &data.EmployeeRepository{c}
+	if authInfo.RoleName == common.PlannerRole {
+		size, employees, err := repo.GetAll(bson.M{"_id": employeeUpdateWorkResource.IdEmployee}, "", 1, 1)
+		if err != nil {
+			common.DisplayAppError(w, err, "Error query database", http.StatusInternalServerError)
+			return
+		}
+		if size == 0 {
+			common.DisplayAppError(w, errors.New("Wrong id"), "Not find this employee", http.StatusBadRequest)
+			return
+		}
+		if authInfo.IdBranch != employees[0].IdBranch {
+			common.DisplayAppError(w, errors.New("Not have permission"), "Not have permission", http.StatusForbidden)
+			return
+		}
+	}
+	err = repo.Update(employeeUpdateWorkResource.IdEmployee,
+		"detailEmployeeWork",
+		authInfo.IdEmployee,
+		employeeUpdateWorkResource.DetailEmployeeWork)
+	if err != nil {
+		common.DisplayAppError(w, err, "Update fail", http.StatusInternalServerError)
+		return
+	}
+	common.DisplayJsonResult(w, nil)
+
 }
