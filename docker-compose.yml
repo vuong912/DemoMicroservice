@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: traefik
+    command: --api --docker --docker.watch
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+  auth:
+    build: ./AuthService
+    image: v/auth
+    restart: always
+    labels:
+      - "traefik.backend=user"
+      - "traefik.frontend.rule=PathPrefixStrip:/user/"
+  employee:
+    build: ./EmployeeService
+    image: v/employee
+    restart: always
+    labels:
+      - "traefik.backend=employee"
+      - "traefik.frontend.rule=PathPrefixStrip:/employee/"
+  role:
+    build: ./RoleService
+    image: v/role
+    restart: always
+    labels:
+      - "traefik.backend=role"
+      - "traefik.frontend.rule=PathPrefixStrip:/role/"
+  schedule:
+    build: ./ScheduleService
+    image: v/schedule
+    restart: always
+    labels:
+      - "traefik.backend=schedule"
+      - "traefik.frontend.rule=PathPrefixStrip:/schedule/"
+  db:
+    image: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+  mongo_seed:
+    build: ./mongo_seed

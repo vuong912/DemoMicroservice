@@ -16,10 +16,10 @@ func SetUsersRouters(router *mux.Router) *mux.Router {
 		common.PlannerRole: true,
 	}
 
-	router.HandleFunc("/user/get", controllers.GetUsersHandler).Methods("GET")
-	router.HandleFunc("/user/login", controllers.LoginHandler).Methods("POST")
-	router.HandleFunc("/user/auth", controllers.AuthHandler).Methods("GET")
-	router.Handle("/user/create", controllers.AuthMiddleware(createUserHandler, &createUserRole)).Methods("POST")
+	router.HandleFunc("/get", controllers.GetUsersHandler).Methods("GET")
+	router.HandleFunc("/login", controllers.LoginHandler).Methods("POST")
+	router.HandleFunc("/auth", controllers.AuthHandler).Methods("GET")
+	router.Handle("/create", controllers.AuthMiddleware(createUserHandler, &createUserRole)).Methods("POST")
 
 	return router
 }

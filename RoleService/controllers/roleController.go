@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/DemoMicroservice/AuthService/common"
+	"github.com/DemoMicroservice/RoleService/common"
 	"github.com/DemoMicroservice/RoleService/data"
 	"gopkg.in/mgo.v2/bson"
 )

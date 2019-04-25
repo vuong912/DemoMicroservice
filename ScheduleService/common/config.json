@@ -1,11 +1,11 @@
 {
-    "Server" : ":8085",
-    "MongoDBHost" : "localhost:27017",
+    "Server" : "0.0.0.0:8080",
+    "MongoDBHost" : "mongo:27017",
     "MongoDBUser" : "",
     "MongoDBPwd" : "",
     "Database" : "scheduledb",
     "ServerIP" : "127.0.0.1",
-    "AuthAPIHost" : "http://127.0.0.1:8080/user/auth",
-    "GetMySelfEmployeeAPIHost":"http://127.0.0.1:8084/employee/getmyself",
-    "GetRoleAPIHost":"http://127.0.0.1:8181/role/get"
+    "AuthAPIHost" : "http://docker.for.win.localhost/user/auth",
+    "GetMySelfEmployeeAPIHost":"http://docker.for.win.localhost/employee/getmyself",
+    "GetRoleAPIHost":"http://docker.for.win.localhost/role/get"
 }

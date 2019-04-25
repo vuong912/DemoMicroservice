@@ -6,6 +6,6 @@ import (
 )
 
 func SetUsersRouters(router *mux.Router) *mux.Router {
-	router.HandleFunc("/role/get", controllers.GetRolesHandler).Methods("GET")
+	router.HandleFunc("/get", controllers.GetRolesHandler).Methods("GET")
 	return router
 }

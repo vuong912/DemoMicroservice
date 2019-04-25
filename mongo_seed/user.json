@@ -1,0 +1,10 @@
+{"_id":{"$oid":"5cacc8606f0c6f2ce87c5800"},"username":"user2","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff1","role":"5cae14b7f4325633bc604bc3"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb2"},"username":"user4","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff3","role":"5cae14b7f4325633bc604bc3"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb4"},"username":"user6","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff5","role":"5cae14b7f4325633bc604bc3"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb1"},"username":"user3","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff2","role":"5cae14b7f4325633bc604bc3"}
+{"_id":{"$oid":"5cacb2a16f0c6f2ce87c57ff"},"username":"admin","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff0","role":"5cae14b7f4325633bc604bc0"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb3"},"username":"user5","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff4","role":"5cae14b7f4325633bc604bc3"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb5"},"username":"planner1","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff6","role":"5cae14b7f4325633bc604bc2"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb6"},"username":"planner2","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff7","role":"5cae14b7f4325633bc604bc2"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb7"},"username":"planner3","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff8","role":"5cae14b7f4325633bc604bc2"}
+{"_id":{"$oid":"5cae01bff4325633bc604bb8"},"username":"owner1","password":"e10adc3949ba59abbe56e057f20f883e","idEmployee":"5cb0372fe929393474fb7ff9","role":"5cae14b7f4325633bc604bc1"}

@@ -101,6 +101,16 @@ func CreateScheduleHandler(w http.ResponseWriter, r *http.Request) {
 		common.DisplayAppError(w, err, "Invalid employee data", http.StatusBadRequest)
 		return
 	}
+	var correctDetailSchedule []models.DetailSchedule
+	for _, val := range schedule.DetailSchedule {
+		if val.IdEmployee != "" {
+			correctDetailSchedule = append(correctDetailSchedule, models.DetailSchedule{
+				IdEmployee: val.IdEmployee,
+				Check:      false,
+			})
+		}
+	}
+	schedule.DetailSchedule = correctDetailSchedule
 	token := r.Header.Get("Authorization")
 	authInfo := tokenToInfo[token]
 
@@ -115,7 +125,7 @@ func CreateScheduleHandler(w http.ResponseWriter, r *http.Request) {
 
 	context := NewContext()
 	defer context.Close()
-	c := context.DbCollection("employee")
+	c := context.DbCollection("schedule")
 	repo := &data.ScheduleRepository{c}
 	err = repo.Create(&schedule)
 	if err != nil {

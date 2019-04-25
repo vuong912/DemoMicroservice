@@ -24,7 +24,7 @@ func SetUsersRouters(router *mux.Router) *mux.Router {
 		common.PlannerRole: true,
 	}
 
-	router.Handle("/schedule/get", controllers.AuthMiddleware(getSchedulesHandler, &getSchedulesRole)).Methods("GET")
-	router.Handle("/schedule/create", controllers.AuthMiddleware(createScheduleHandler, &createScheduleRole)).Methods("POST")
+	router.Handle("/get", controllers.AuthMiddleware(getSchedulesHandler, &getSchedulesRole)).Methods("GET")
+	router.Handle("/create", controllers.AuthMiddleware(createScheduleHandler, &createScheduleRole)).Methods("POST")
 	return router
 }

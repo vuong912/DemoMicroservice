@@ -32,10 +32,10 @@ func SetUsersRouters(router *mux.Router) *mux.Router {
 		common.PlannerRole: true,
 	}
 
-	router.Handle("/employee/get", controllers.AuthMiddleware(getEmployeesHandler, &getEmployeesRole)).Methods("GET")
-	router.HandleFunc("/employee/getmyself", controllers.GetMyseftHandler).Methods("GET")
-	router.Handle("/employee/create", controllers.AuthMiddleware(createEmployeeHandler, &createEmployeeRole)).Methods("POST")
-	router.Handle("/employee/update/work", controllers.AuthMiddleware(updateEmployeeWorkHandler, &updateEmployeeWorkRole)).Methods("POST")
+	router.Handle("/get", controllers.AuthMiddleware(getEmployeesHandler, &getEmployeesRole)).Methods("GET")
+	router.HandleFunc("/getmyself", controllers.GetMyseftHandler).Methods("GET")
+	router.Handle("/create", controllers.AuthMiddleware(createEmployeeHandler, &createEmployeeRole)).Methods("POST")
+	router.Handle("/update/work", controllers.AuthMiddleware(updateEmployeeWorkHandler, &updateEmployeeWorkRole)).Methods("POST")
 
 	return router
 }

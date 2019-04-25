@@ -104,8 +104,10 @@ func RequestService(method string, path string, body io.Reader, token string) ([
 	req, _ := http.NewRequest(method, path, body)
 	req.Header.Add("Authorization", token)
 	resp, err := client.Do(req)
-
-	if err == nil && resp.StatusCode == 200 {
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 200 {
 		bytes, _ := ioutil.ReadAll(resp.Body)
 		return bytes, nil
 	} else {

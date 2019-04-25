@@ -1,0 +1,5 @@
+{"_id":{"$oid":"5cae14b7f4325633bc604bc0"},"roleName":"Admin","status":true,"createdDay":{"$date":{"$numberLong":"983379920000"}},"modifiedDay":{"$date":{"$numberLong":"988635760000"}},"createdBy":"absbe","modifiedBy":"sebsebse"}
+{"_id":{"$oid":"5cae14b7f4325633bc604bc1"},"roleName":"Owner","status":true,"createdDay":{"$date":{"$numberLong":"992450005400"}},"modifiedDay":{"$date":{"$numberLong":"988837760000"}},"createdBy":"sef","modifiedBy":"sefsv"}
+{"_id":{"$oid":"5cae14b7f4325633bc604bc2"},"roleName":"Planner","status":true,"createdDay":{"$date":{"$numberLong":"983379920000"}},"modifiedDay":{"$date":{"$numberLong":"988366760000"}},"createdBy":"364fe","modifiedBy":"xddef"}
+{"_id":{"$oid":"5cae14b7f4325633bc604bc3"},"roleName":"Employee","status":true,"createdDay":{"$date":{"$numberLong":"992458705400"}},"modifiedDay":{"$date":{"$numberLong":"988832260000"}},"createdBy":"345t","modifiedBy":"wgewe"}
+{"_id":{"$oid":"5cae14b7f4325633bc604bc4"},"roleName":"Manager","status":false,"createdDay":{"$date":{"$numberLong":"983377820000"}},"modifiedDay":{"$date":{"$numberLong":"989366760000"}},"createdBy":"htrh","modifiedBy":"rhttt"}
